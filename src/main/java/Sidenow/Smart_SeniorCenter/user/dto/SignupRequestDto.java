@@ -17,5 +17,6 @@ public class SignupRequestDto {
 
     private String birth;
 
+    private String phonenum;
 
 }

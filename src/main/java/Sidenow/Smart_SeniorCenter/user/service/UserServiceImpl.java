@@ -35,6 +35,7 @@ public class UserServiceImpl implements UserService{
                 .name(signupRequestDto.getName())
                 .username(signupRequestDto.getUsername())
                 .birth(signupRequestDto.getBirth())
+                .phonenum(signupRequestDto.getPhonenum())
                 .password(encode)
                 .build();
         User savedUser=userRepository.save(user);
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService{
 
         return LoginResponseDto.builder()
                 .message("로그인 성공")
-                .token(token)
+                //.token(token)
                 .username(user.getUsername())
                 .build();
     }
