@@ -20,7 +20,6 @@ public class User {
 
     private String username;
 
-    @Column(length = 20)
     private String password;
 
     private String birth;

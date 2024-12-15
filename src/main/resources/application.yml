@@ -14,3 +14,5 @@ spring:
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQLDialect
       open-in-view: false
+  jwt:
+    secret: "0SE/1s6T59aT75/Du/QMFTSLUTy+iU1eSlf7Sv3G+ZI="

@@ -1,5 +1,7 @@
 package Sidenow.Smart_SeniorCenter.user.service;
 
+import Sidenow.Smart_SeniorCenter.jwt.JwtGenerator;
+import Sidenow.Smart_SeniorCenter.jwt.JwtToken;
 import Sidenow.Smart_SeniorCenter.user.dto.LoginRequestDto;
 import Sidenow.Smart_SeniorCenter.user.dto.LoginResponseDto;
 import Sidenow.Smart_SeniorCenter.user.dto.SignupRequestDto;
@@ -18,6 +20,7 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtGenerator jwtGenerator;
 
     @Override
     public SignupResponseDto create(SignupRequestDto signupRequestDto){
@@ -51,10 +54,13 @@ public class UserServiceImpl implements UserService{
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
+        JwtToken jwtToken = jwtGenerator.generateToken(user.getId());
+
 
         return LoginResponseDto.builder()
                 .message("로그인 성공")
-                //.token(token)
+                .accessToken(jwtToken.getAccessToken())
+                .refreshToken(jwtToken.getRefreshToken())
                 .username(user.getUsername())
                 .build();
     }
