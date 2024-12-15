@@ -20,7 +20,6 @@ public class JwtGenerator {
     private final Key key;
     private static final String GRANT_TYPE = "Bearer";
 
-    // application.yml에서 secret 값 가져와서 key에 저장
     public JwtGenerator(@Value("${spring.jwt.secret}") String secretKey) {
 //        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 //        this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -28,13 +27,10 @@ public class JwtGenerator {
         this.key = Keys.hmacShaKeyFor(keyBytes);  // HMAC SHA Key 생성
     }
 
-    // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
     public JwtToken generateToken(Long userId) {
-        // 권한 가져오기
 
         long now = (new Date()).getTime();
 
-        // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + 86400000);
 
         String accessToken = Jwts.builder()
@@ -44,7 +40,6 @@ public class JwtGenerator {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Refresh Token 생성
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now + 604800000))
                 .signWith(key, SignatureAlgorithm.HS256)
