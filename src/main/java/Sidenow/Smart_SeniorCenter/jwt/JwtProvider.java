@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JwtProvider {
+
     private final Key key;
 
     public JwtProvider(@Value("${spring.jwt.secret}") String secretKey) {

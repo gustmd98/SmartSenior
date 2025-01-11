@@ -21,8 +21,7 @@ public class JwtGenerator {
     private static final String GRANT_TYPE = "Bearer";
 
     public JwtGenerator(@Value("${spring.jwt.secret}") String secretKey) {
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        this.key = Keys.hmacShaKeyFor(keyBytes);
+
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);  // 일반 문자열을 바이트 배열로 변환
         this.key = Keys.hmacShaKeyFor(keyBytes);  // HMAC SHA Key 생성
     }
@@ -35,12 +34,12 @@ public class JwtGenerator {
 
         String accessToken = Jwts.builder()
                 .setSubject(String.valueOf(userId))
-//                .claim("auth", authorities) 권한 설정 안했음
+           //     .claim("auth", authorities)// 권한 설정 안했음
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        String refreshToken = Jwts.builder()
+        String refreshToken = Jwts.builder()//아직 리프레쉬 토큰은 구현못함
                 .setExpiration(new Date(now + 604800000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
