@@ -6,8 +6,16 @@ import java.util.List;
 
 public interface AppointmentService {
     AppointmentResponseDto createAppointment(Long userId, AppointmentRequestDto requestDto);
-    List<AppointmentResponseDto> getAppointmentsByUser(Long userId);
     String deleteAppointment(Long appointmentId);
-    AppointmentResponseDto updateAppointment(Long appointmentId, AppointmentRequestDto requestDto);
+    String cancelParticipation(Long appointmentId, String username);
+    String failAppointment(Long appointmentId);
+    String joinAppointment(Long appointmentId, String username);
+    List<AppointmentResponseDto> getAppointmentsByUser(Long userId);
+    List<AppointmentResponseDto> getJoinedAppointments(String username);
+    void autoCancelExpiredAppointments();
 }
+
+
+
+
 
