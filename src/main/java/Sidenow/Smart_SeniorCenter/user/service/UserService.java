@@ -11,4 +11,7 @@ public interface UserService {
 
    LoginResponseDto login(LoginRequestDto loginRequestDto);
 
+   // 중복 아이디 확인 메서드 추가
+   boolean isUsernameAvailable(String username);
 }
+
