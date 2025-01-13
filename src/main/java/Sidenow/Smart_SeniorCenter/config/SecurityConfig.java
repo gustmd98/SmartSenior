@@ -1,34 +1,49 @@
 package Sidenow.Smart_SeniorCenter.config;
 
+import Sidenow.Smart_SeniorCenter.jwt.JwtAuthenticationFilter;
+import Sidenow.Smart_SeniorCenter.jwt.JwtProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import org.springframework.security.config.Customizer;
+
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtProvider jwtProvider;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(Customizer.withDefaults()) // CORS 설정 활성화
-                .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 모든 요청 인증 없이 허용
-                );
 
-        return http.build();
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/user/signup", "/api/user/login").permitAll() // 두경로만 인증 불필요
+                        .anyRequest().authenticated()) // 그 외 모든 요청은 인증 필요
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(customAuthenticationEntryPoint))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .build();
     }
 
     @Bean
@@ -44,9 +59,10 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        return  new BCryptPasswordEncoder();
     }
 }
 

@@ -1,9 +1,10 @@
 package Sidenow.Smart_SeniorCenter.user.service;
 
-import Sidenow.Smart_SeniorCenter.user.dto.LoginRequestDto;
-import Sidenow.Smart_SeniorCenter.user.dto.LoginResponseDto;
-import Sidenow.Smart_SeniorCenter.user.dto.SignupRequestDto;
-import Sidenow.Smart_SeniorCenter.user.dto.SignupResponseDto;
+import Sidenow.Smart_SeniorCenter.user.dto.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.security.Principal;
 
 public interface UserService {
 
@@ -13,5 +14,10 @@ public interface UserService {
 
    // 중복 아이디 확인 메서드 추가
    boolean isUsernameAvailable(String username);
+   String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto);
+
+  // String saveProfileImage(MultipartFile profileImage);
+
+   String saveProfileImage(String username, MultipartFile file) throws IOException;
 }
 

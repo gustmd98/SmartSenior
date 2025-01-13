@@ -1,5 +1,6 @@
 package Sidenow.Smart_SeniorCenter.apiPayload.common;
 
+
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;

@@ -18,9 +18,9 @@ public class User {
     @Column(unique = true,length = 10)
     private String name;
 
+    @Column(unique = true)//controller에 중복검증로직이 있어도 동시에 접속되면 중복될수있어서 unique 조건 추가
     private String username;
 
-    @Column
     private String password;
 
     private String birth;
@@ -30,5 +30,8 @@ public class User {
     @Column(unique = true)
     private String phonenum;
 
+    private String profileImagePath;
+
+    private String favoriteplace;
 
 }
