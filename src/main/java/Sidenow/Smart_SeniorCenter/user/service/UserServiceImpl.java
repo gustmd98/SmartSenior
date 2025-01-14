@@ -4,6 +4,7 @@ import Sidenow.Smart_SeniorCenter.jwt.JwtGenerator;
 import Sidenow.Smart_SeniorCenter.jwt.JwtToken;
 import Sidenow.Smart_SeniorCenter.user.dto.*;
 import Sidenow.Smart_SeniorCenter.user.entity.User;
+import Sidenow.Smart_SeniorCenter.user.entity.UserRole;
 import Sidenow.Smart_SeniorCenter.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.List;
 
 @Service
 @Transactional
@@ -44,13 +46,15 @@ public class UserServiceImpl implements UserService {
         // 비밀번호 암호화
         String encode = passwordEncoder.encode(signupRequestDto.getPassword());
 
-        // User 생성 및 저장
+        UserRole userRole = UserRole.USER;  // 기본적으로 USER 권한 부여
+
         User user = User.builder()
                 .name(signupRequestDto.getName())
                 .username(signupRequestDto.getUsername())
                 .birth(signupRequestDto.getBirth())
                 .phonenum(signupRequestDto.getPhonenum())
                 .password(encode)
+                .roles(List.of(userRole))
                 .build();
 
         try {
@@ -77,7 +81,11 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
-        JwtToken jwtToken = jwtGenerator.generateToken(user.getId());
+
+        List<UserRole> roles;
+        roles = user.getRoles();
+
+        JwtToken jwtToken = jwtGenerator.generateToken(user.getId(),roles);
 
 
         // 로그인 성공 응답 반환

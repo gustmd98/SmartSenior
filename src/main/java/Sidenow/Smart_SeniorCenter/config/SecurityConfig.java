@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/user/signup", "/api/user/login").permitAll() // 두경로만 인증 불필요
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // USER 및 ADMIN 권한 모두 접근 가능
                         .anyRequest().authenticated()) // 그 외 모든 요청은 인증 필요
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(customAuthenticationEntryPoint))
