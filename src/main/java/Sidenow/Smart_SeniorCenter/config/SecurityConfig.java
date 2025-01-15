@@ -30,13 +30,15 @@ public class SecurityConfig {
 
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/signup", "/api/user/login").permitAll() // 두경로만 인증 불필요
+                        .requestMatchers("/api/user/signup", "/api/user/login", "/api/user/check-username").permitAll() // 두경로만 인증 불필요
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // USER 및 ADMIN 권한 모두 접근 가능
                         .anyRequest().authenticated()) // 그 외 모든 요청은 인증 필요
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -50,7 +52,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true); // 쿠키 허용
-        configuration.addAllowedOrigin("http://localhost:5175"); // 허용할 프론트엔드 URL
+        configuration.addAllowedOrigin("http://localhost:5173"); // 허용할 프론트엔드 URL
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
 
