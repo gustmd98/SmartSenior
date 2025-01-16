@@ -97,7 +97,8 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto) {
+    @Override
+    public String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto,MultipartFile profileImage) {
 
         String username = principal.getName();
 
@@ -115,11 +116,9 @@ public class UserServiceImpl implements UserService {
             user.setFavoriteplace(updateProfileRequestDto.getFavoriteplace());
         }
         // 프로필 이미지가 포함되어 있으면 파일을 저장하고 경로를 설정
-        if (updateProfileRequestDto.getProfileImage() != null) {
-
+        if (profileImage != null && !profileImage.isEmpty()) {
             String existingImagePath = user.getProfileImagePath();
             if (existingImagePath != null && !existingImagePath.isEmpty()) {
-                // 이전 이미지를 파일 시스템에서 삭제
                 try {
                     Files.deleteIfExists(Paths.get(existingImagePath));
                 } catch (IOException e) {
@@ -127,8 +126,8 @@ public class UserServiceImpl implements UserService {
                 }
             }
             try {
-                String profileImagePath = saveProfileImage(username, updateProfileRequestDto.getProfileImage());
-                user.setProfileImagePath(profileImagePath);  // 저장된 이미지 경로 설정
+                String profileImagePath = saveProfileImage(username, profileImage);
+                user.setProfileImagePath(profileImagePath);
             } catch (IOException e) {
                 throw new RuntimeException("Profile image upload failed", e);
             }
@@ -151,10 +150,8 @@ public class UserServiceImpl implements UserService {
         String originalFileName = file.getOriginalFilename();
         String fileName = username + "_" + System.currentTimeMillis() + "_" + originalFileName;
 
-        // 파일 경로 설정
         Path targetLocation = userDirPath.resolve(fileName);
 
-        // 파일 저장
         Files.copy(file.getInputStream(), targetLocation);
 
         return targetLocation.toString();

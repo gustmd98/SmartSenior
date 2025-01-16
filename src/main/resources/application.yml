@@ -8,6 +8,12 @@ spring:
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
+#  servlet:
+#    multipart:
+#      enabled: true        # Multipart 활성화
+#      max-file-size: 10MB  # 최대 파일 크기 설정
+#      max-request-size: 10MB # 최대 요청 크기 설정
+
   jpa:
     hibernate:
       ddl-auto: update

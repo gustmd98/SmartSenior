@@ -12,8 +12,10 @@ import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.security.Principal;
@@ -74,20 +76,44 @@ public class UserController {
 
 
 
-        @PutMapping("/profile")
-        public ResponseEntity<String> updateProfile (
-                @RequestBody UpdateProfileRequestDto updateProfileRequestDto,
-                Principal principal){
-            userService.updateProfile(principal, updateProfileRequestDto);  // 인증된 사용자 정보와 DTO 전달
-            return ResponseEntity.ok("Profile updated successfully");
-        }
-
-//    @GetMapping("/profile")
-//    public String getUserProfile(Principal principal) {
-//        String username = principal.getName();
-//        System.out.println("Logged in username: " + username);
-//        // 추가 처리
-//        return "profile";
+//    @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<String> updateProfile(
+//            @RequestPart("data") UpdateProfileRequestDto updateProfileRequestDto,  // JSON 데이터를 받음
+//            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage, // 이미지 파일 받음
+//            Principal principal) {
+//
+//        // 서비스 호출
+//        String result = userService.updateProfile(principal, updateProfileRequestDto, profileImage);
+//
+//        // 성공 응답
+//        return ResponseEntity.ok(result);
 //    }
+    @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updateProfile(
+            @RequestPart("data") UpdateProfileRequestDto updateProfileRequestDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            Principal principal) {
 
+        System.out.println("Data received: " + updateProfileRequestDto);
+        System.out.println("Profile image received: " + (profileImage != null ? profileImage.getOriginalFilename() : "None"));
+
+        // 서비스 호출
+        String result = userService.updateProfile(principal, updateProfileRequestDto, profileImage);
+
+        // 성공 응답
+        return ResponseEntity.ok(result);
+    }
+//    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<String> updateProfile(
+//            @RequestPart("data") UpdateProfileRequestDto updateProfileRequestDto,
+//            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+//            Principal principal) {
+//
+//        userService.updateProfile(principal, updateProfileRequestDto, profileImage);
+//        return ResponseEntity.ok("Profile updated successfully");
+//    }
 }
+
+
+
+
