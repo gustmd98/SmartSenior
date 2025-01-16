@@ -3,13 +3,15 @@ package Sidenow.Smart_SeniorCenter.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +36,7 @@ public class User {
 
     private String favoriteplace;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private List<UserRole> roles;
 }

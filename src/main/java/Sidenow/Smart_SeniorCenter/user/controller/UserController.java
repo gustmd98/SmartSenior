@@ -54,7 +54,7 @@ public class UserController {
         );
     }
 
-//        @PostMapping("/refresh")//refrehapi 구현 아직안됨
+//        @PostMapping("/refresh")
 //        public ResponseEntity<?> refreshToken (@RequestBody RefreshTokenRequestDto refreshTokenRequestDto){
 //            String refreshToken = refreshTokenRequestDto.getRefreshToken();
 //
@@ -64,7 +64,7 @@ public class UserController {
 //                Claims claims = (Claims) jwtProvider.getAuthentication(refreshToken).getPrincipal();  // getAuthentication을 호출하여 Claims 얻기
 //                Long userId = Long.valueOf(claims.getSubject());
 //
-//                JwtToken newJwtToken = jwtGenerator.generateToken(userId);
+//                JwtToken newJwtToken = jwtGenerator.generateToken(userId,roles);
 //
 //                return ResponseEntity.ok(new JwtToken("Bearer", newJwtToken.getAccessToken(), newJwtToken.getRefreshToken()));
 //            } else {
@@ -74,12 +74,20 @@ public class UserController {
 
 
 
-        @PutMapping("/profile")
-        public ResponseEntity<String> updateProfile (
-                @ModelAttribute UpdateProfileRequestDto updateProfileRequestDto,
-                Principal principal){
-            userService.updateProfile(principal, updateProfileRequestDto);  // 인증된 사용자 정보와 DTO 전달
-            return ResponseEntity.ok("Profile updated successfully");
-        }
+    @PutMapping("/profile")
+    public ResponseEntity<String> updateProfile (
+            @RequestBody UpdateProfileRequestDto updateProfileRequestDto,
+            Principal principal){
+        userService.updateProfile(principal, updateProfileRequestDto);  // 인증된 사용자 정보와 DTO 전달
+        return ResponseEntity.ok("Profile updated successfully");
+    }
+
+//    @GetMapping("/profile")
+//    public String getUserProfile(Principal principal) {
+//        String username = principal.getName();
+//        System.out.println("Logged in username: " + username);
+//        // 추가 처리
+//        return "profile";
+//    }
 
 }

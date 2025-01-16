@@ -1,4 +1,5 @@
 package Sidenow.Smart_SeniorCenter.jwt;
+import Sidenow.Smart_SeniorCenter.user.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,7 +14,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtGenerator {
@@ -26,15 +30,19 @@ public class JwtGenerator {
         this.key = Keys.hmacShaKeyFor(keyBytes);  // HMAC SHA Key 생성
     }
 
-    public JwtToken generateToken(Long userId) {
+    public JwtToken generateToken(Long userId,List<UserRole> roles) {
 
         long now = (new Date()).getTime();
 
         Date accessTokenExpiresIn = new Date(now + 86400000);
 
+        String authorities = roles.stream()
+                .map(UserRole::getValue)  // Enum -> String 변환
+                .collect(Collectors.joining(","));
+
         String accessToken = Jwts.builder()
                 .setSubject(String.valueOf(userId))
-           //     .claim("auth", authorities)// 권한 설정 안했음
+                .claim("auth", authorities)// 권한 설정
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();

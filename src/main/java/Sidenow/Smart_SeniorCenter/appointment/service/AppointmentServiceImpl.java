@@ -2,16 +2,15 @@ package Sidenow.Smart_SeniorCenter.appointment.service;
 
 import Sidenow.Smart_SeniorCenter.appointment.dto.AppointmentRequestDto;
 import Sidenow.Smart_SeniorCenter.appointment.dto.AppointmentResponseDto;
+import Sidenow.Smart_SeniorCenter.appointment.dto.MemberInfoResponseDto;
 import Sidenow.Smart_SeniorCenter.appointment.entity.Appointment;
 import Sidenow.Smart_SeniorCenter.appointment.entity.AppointmentStatus;
 import Sidenow.Smart_SeniorCenter.appointment.repository.AppointmentRepository;
 import Sidenow.Smart_SeniorCenter.user.entity.User;
 import Sidenow.Smart_SeniorCenter.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,13 +21,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
 
+    // **로그인 기반 약속 생성 기능**
     @Override
     public AppointmentResponseDto createAppointment(Long userId, AppointmentRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         if (requestDto.getMaxParticipants() < 2) {
-            throw new IllegalArgumentException("최소 인원은 본인을 포함해 2명 이상이어야 합니다.");
+            throw new IllegalArgumentException("최소 인원은 2명 이상이어야 합니다.");
         }
 
         Appointment appointment = Appointment.builder()
@@ -36,32 +36,26 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .description(requestDto.getDescription())
                 .startTime(requestDto.getStartTime())
                 .endTime(requestDto.getEndTime())
-                .user(user)
                 .maxParticipants(requestDto.getMaxParticipants())
-                .participants(List.of(user.getUsername()))  // 본인 포함
+                .participants(List.of(user.getUsername()))
+                .user(user)
                 .status(AppointmentStatus.ACTIVE)
                 .build();
 
         appointmentRepository.save(appointment);
-        return AppointmentResponseDto.builder()
-                .id(appointment.getId())
-                .title(appointment.getTitle())
-                .description(appointment.getDescription())
-                .statusMessage("약속 생성 완료")
-                .currentParticipants(1)  // 본인 포함 초기 참여자 수
-                .maxParticipants(requestDto.getMaxParticipants())
-                .build();
+        return buildAppointmentResponseDto(appointment);
     }
 
+    // **약속 삭제 기능**
     @Override
     public String deleteAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("약속을 찾을 수 없습니다."));
-
         appointmentRepository.delete(appointment);
         return "약속 삭제 완료";
     }
 
+    // **약속 참여 취소 기능**
     @Override
     public String cancelParticipation(Long appointmentId, String username) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -71,7 +65,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalArgumentException("해당 사용자는 참여자가 아닙니다.");
         }
 
-        // 참여자가 2명 이하가 되면 상태를 "취소됨"으로 변경
         if (appointment.getParticipants().size() < 2) {
             appointment.setStatus(AppointmentStatus.CANCELED);
         }
@@ -80,6 +73,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return "참여 취소 완료";
     }
 
+    // **약속 파투 처리**
     @Override
     public String failAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -90,21 +84,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         return "약속이 파투 처리되었습니다.";
     }
 
-    @Scheduled(cron = "0 0 * * * *") // 매 시간 정각마다 실행
+    // **약속 생성 조회**
     @Override
-    public void autoCancelExpiredAppointments() {
-        List<Appointment> appointments = appointmentRepository.findAll();
-        LocalDateTime now = LocalDateTime.now();
+    public List<AppointmentResponseDto> getAppointmentsByUsername(String username) {
+        List<Appointment> appointments = appointmentRepository.findAll().stream()
+                .filter(appointment -> appointment.getParticipants().contains(username))
+                .collect(Collectors.toList());
 
-        for (Appointment appointment : appointments) {
-            if (appointment.getStartTime().isBefore(now) && appointment.getStatus() == AppointmentStatus.ACTIVE) {
-                appointment.setStatus(AppointmentStatus.CANCELED);
-                appointmentRepository.save(appointment);
-            }
-        }
+        return appointments.stream().map(this::buildAppointmentResponseDto).collect(Collectors.toList());
     }
 
-    // **수정된 부분: 최대 참여자 수 도달 시 상태 변경 및 예외 처리 추가**
+    // **약속 참여 신청**
     @Override
     public String joinAppointment(Long appointmentId, String username) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -121,61 +111,77 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.getParticipants().add(username);
 
         if (appointment.getParticipants().size() == appointment.getMaxParticipants()) {
-            appointment.setStatus(AppointmentStatus.CONFIRMED);  // 최대 인원 도달 시 "확정" 상태
+            appointment.setStatus(AppointmentStatus.CONFIRMED);
         }
 
         appointmentRepository.save(appointment);
         return "참여 신청 완료!";
     }
 
-    // **내가 만든 약속 조회**
+    // **전체 약속 조회**
+    @Override
+    public List<AppointmentResponseDto> getAllAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+        return appointments.stream().map(this::buildAppointmentResponseDto).collect(Collectors.toList());
+    }
+
+    // **내가 만든 약속 조회 (userId 기반)**
     @Override
     public List<AppointmentResponseDto> getAppointmentsByUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         List<Appointment> appointments = appointmentRepository.findByUser(user);
-        return appointments.stream().map(appointment -> {
-            String statusMessage;
-            if (appointment.getStatus() == AppointmentStatus.CANCELED) {
-                statusMessage = "취소됨";
-            } else if (appointment.getStatus() == AppointmentStatus.CONFIRMED) {
-                statusMessage = "확정";
-            } else {
-                statusMessage = "모집 중";
-            }
-            return AppointmentResponseDto.builder()
-                    .id(appointment.getId())
-                    .title(appointment.getTitle())
-                    .description(appointment.getDescription())
-                    .statusMessage(statusMessage)
-                    .currentParticipants(appointment.getParticipants().size())
-                    .maxParticipants(appointment.getMaxParticipants())
-                    .build();
-        }).collect(Collectors.toList());
+        return appointments.stream().map(this::buildAppointmentResponseDto).collect(Collectors.toList());
     }
 
-    // **내가 참여한 약속 조회**
+    // **내가 참여한 약속 조회 (username 기반)**
     @Override
     public List<AppointmentResponseDto> getJoinedAppointments(String username) {
         List<Appointment> joinedAppointments = appointmentRepository.findAll().stream()
                 .filter(appointment -> appointment.getParticipants().contains(username))
-                .toList();
+                .collect(Collectors.toList());
 
-        return joinedAppointments.stream().map(appointment -> {
-            String statusMessage = switch (appointment.getStatus()) {
-                case CANCELED -> "취소됨";
-                case CONFIRMED -> "확정됨";
-                default -> "모집 중";
-            };
-            return AppointmentResponseDto.builder()
-                    .id(appointment.getId())
-                    .title(appointment.getTitle())
-                    .description(appointment.getDescription())
-                    .statusMessage(statusMessage)
-                    .currentParticipants(appointment.getParticipants().size())
-                    .maxParticipants(appointment.getMaxParticipants())
-                    .build();
+        return joinedAppointments.stream().map(this::buildAppointmentResponseDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemberInfoResponseDto> getAppointmentMembers(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("약속을 찾을 수 없습니다."));
+
+        return appointment.getParticipants().stream().map(username -> {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("참여자 정보를 찾을 수 없습니다."));
+            return new MemberInfoResponseDto(user.getUsername(), user.getPhonenum());
+        }).toList();
+    }
+
+    // **Response DTO 생성 메서드**
+    private AppointmentResponseDto buildAppointmentResponseDto(Appointment appointment) {
+        List<MemberInfoResponseDto> members = appointment.getParticipants().stream().map(username -> {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("참여자 정보를 찾을 수 없습니다."));
+            return new MemberInfoResponseDto(user.getUsername(), user.getPhonenum());
         }).collect(Collectors.toList());
+
+        return AppointmentResponseDto.builder()
+                .id(appointment.getId())
+                .title(appointment.getTitle())
+                .description(appointment.getDescription())
+                .location(appointment.getLocation())
+                .statusMessage(appointment.getStatus().toString())
+                .currentParticipants(appointment.getParticipants().size())
+                .maxParticipants(appointment.getMaxParticipants())
+                .members(members) // 멤버 정보 추가
+                .build();
     }
 }
+
+
+
+
+
+
+
+
