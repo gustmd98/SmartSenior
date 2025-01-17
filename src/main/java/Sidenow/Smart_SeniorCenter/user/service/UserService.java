@@ -17,6 +17,8 @@ public interface UserService {
    String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto);
 
   // String saveProfileImage(MultipartFile profileImage);
+   UserProfileDto getUserProfile(String userid);
+
 
    String saveProfileImage(String username, MultipartFile file) throws IOException;
 }

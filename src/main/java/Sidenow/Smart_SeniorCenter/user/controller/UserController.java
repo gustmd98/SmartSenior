@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -73,6 +75,38 @@ public class UserController {
 //        }
 
 
+//    @GetMapping("/profile")
+//    public ResponseEntity<ApiResponse<UserProfileDto>> getProfile(Principal principal) {
+//        String username = principal.getName(); // 인증된 사용자 이름 가져오기
+//        UserProfileDto profileDto = userService.getUserProfile(username); // 서비스 호출
+//        return ResponseEntity.ok(new ApiResponse<>(true, "200", "프로필 데이터 가져오기 성공", profileDto));
+//    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<UserProfileDto>> getProfile(Principal principal) {
+        if (principal == null) {
+            System.out.println("JWT 토큰이 없거나 유효하지 않습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, "401", "User not authenticated", null));
+        }
+
+        String userId = principal.getName(); // JWT 토큰에서 userId를 바로 가져옴
+
+        // 사용자 정보를 가져오는 서비스 호출
+        UserProfileDto profileDto = userService.getUserProfile(userId);
+
+        if (profileDto == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, "404", "User profile not found", null));
+        }
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "200", "프로필 데이터 가져오기 성공", profileDto));
+    }
+
+//    @GetMapping("/profile")
+//    public ResponseEntity<ApiResponse<UserProfileDto>> getProfile(Principal principal) {
+//        String userId = principal.getName(); // 사용자 ID 가져오기
+//        UserProfileDto profileDto = userService.getUserProfile(userId); // ID로 프로필 조회
+//        return ResponseEntity.ok(new ApiResponse<>(true, "200", "프로필 데이터 가져오기 성공", profileDto));
+//    }
 
     @PutMapping("/profile")
     public ResponseEntity<String> updateProfile (

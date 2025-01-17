@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Service
@@ -94,6 +95,31 @@ public class UserServiceImpl implements UserService {
                 .accessToken(jwtToken.getAccessToken())
                 .refreshToken(jwtToken.getRefreshToken())
                 .username(user.getUsername())
+                .build();
+    }
+
+    @Override
+    public UserProfileDto getUserProfile(String userId) {
+        Long userIdLong;
+        try {
+            userIdLong = Long.valueOf(userId);  // userId를 Long으로 변환
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid userId format");
+        }
+        // findById 사용해서 userId로 User 조회
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+
+
+        // Builder를 사용하여 UserProfileDto 객체 생성
+        return UserProfileDto.builder()
+                .username(user.getUsername())
+                .birth(user.getBirth() != null ? user.getBirth() : "Unknown")
+                .name(user.getName() != null ? user.getName() : "Unknown")
+                .phonenum(user.getPhonenum() != null ? user.getPhonenum() : "Unknown")
+                .favoriteplace(user.getFavoriteplace() != null ? user.getFavoriteplace() : "Unknown")
+                .profileImagePath(user.getProfileImagePath() != null ? user.getProfileImagePath() : "")
                 .build();
     }
 
