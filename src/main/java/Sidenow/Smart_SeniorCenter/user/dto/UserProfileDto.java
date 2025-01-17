@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class UserProfileDto {
 
+    //private String password;
     private String username;
     private String birth;
     private String name;

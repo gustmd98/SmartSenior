@@ -75,12 +75,6 @@ public class UserController {
 //        }
 
 
-//    @GetMapping("/profile")
-//    public ResponseEntity<ApiResponse<UserProfileDto>> getProfile(Principal principal) {
-//        String username = principal.getName(); // 인증된 사용자 이름 가져오기
-//        UserProfileDto profileDto = userService.getUserProfile(username); // 서비스 호출
-//        return ResponseEntity.ok(new ApiResponse<>(true, "200", "프로필 데이터 가져오기 성공", profileDto));
-//    }
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<UserProfileDto>> getProfile(Principal principal) {
@@ -89,9 +83,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, "401", "User not authenticated", null));
         }
 
-        String userId = principal.getName(); // JWT 토큰에서 userId를 바로 가져옴
+        String userId = principal.getName(); // JWT 토큰에서 userId가져옴 토큰에 userid를 넣어서 getName하면 id가 뽑힘
 
-        // 사용자 정보를 가져오는 서비스 호출
         UserProfileDto profileDto = userService.getUserProfile(userId);
 
         if (profileDto == null) {
@@ -101,12 +94,6 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse<>(true, "200", "프로필 데이터 가져오기 성공", profileDto));
     }
 
-//    @GetMapping("/profile")
-//    public ResponseEntity<ApiResponse<UserProfileDto>> getProfile(Principal principal) {
-//        String userId = principal.getName(); // 사용자 ID 가져오기
-//        UserProfileDto profileDto = userService.getUserProfile(userId); // ID로 프로필 조회
-//        return ResponseEntity.ok(new ApiResponse<>(true, "200", "프로필 데이터 가져오기 성공", profileDto));
-//    }
 
     @PutMapping("/profile")
     public ResponseEntity<String> updateProfile (
@@ -116,12 +103,5 @@ public class UserController {
         return ResponseEntity.ok("Profile updated successfully");
     }
 
-//    @GetMapping("/profile")
-//    public String getUserProfile(Principal principal) {
-//        String username = principal.getName();
-//        System.out.println("Logged in username: " + username);
-//        // 추가 처리
-//        return "profile";
-//    }
 
 }

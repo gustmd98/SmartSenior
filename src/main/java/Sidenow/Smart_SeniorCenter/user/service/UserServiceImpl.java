@@ -110,13 +110,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-
-
-        // Builder를 사용하여 UserProfileDto 객체 생성
         return UserProfileDto.builder()
-                .username(user.getUsername())
-                .birth(user.getBirth() != null ? user.getBirth() : "Unknown")
                 .name(user.getName() != null ? user.getName() : "Unknown")
+                .birth(user.getBirth() != null ? user.getBirth() : "Unknown")
+                .username(user.getUsername()!= null ? user.getUsername() : "Unknown")
                 .phonenum(user.getPhonenum() != null ? user.getPhonenum() : "Unknown")
                 .favoriteplace(user.getFavoriteplace() != null ? user.getFavoriteplace() : "Unknown")
                 .profileImagePath(user.getProfileImagePath() != null ? user.getProfileImagePath() : "")
@@ -163,7 +160,6 @@ public class UserServiceImpl implements UserService {
 
         return "Updated successfully";
     }
-
     @Override
     public String saveProfileImage(String username, MultipartFile file) throws IOException {
 

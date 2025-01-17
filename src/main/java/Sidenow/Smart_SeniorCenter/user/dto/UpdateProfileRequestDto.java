@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class UpdateProfileRequestDto {
+
     private String password;
     private String phonenum;
     private MultipartFile profileImage;

@@ -14,11 +14,10 @@ public interface UserService {
 
    // 중복 아이디 확인 메서드 추가
    boolean isUsernameAvailable(String username);
+
    String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto);
 
-  // String saveProfileImage(MultipartFile profileImage);
-   UserProfileDto getUserProfile(String userid);
-
+   UserProfileDto getUserProfile(String userid);//프로필정보 보기
 
    String saveProfileImage(String username, MultipartFile file) throws IOException;
 }
