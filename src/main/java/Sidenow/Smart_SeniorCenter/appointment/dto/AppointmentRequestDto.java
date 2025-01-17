@@ -13,8 +13,8 @@ public class AppointmentRequestDto {
     private String location;          // 약속 장소
 
     // **추가된 필드**
-    private String createdBy;         // 약속 생성자의 이름 (필수 입력)
-    private String phoneNumber;       // 생성자의 연락처 (옵션)
+   // private String createdBy;         // 약속 생성자의 이름 (필수 입력)
+    //private String phoneNumber;       // 생성자의 연락처 (옵션)
 }
 
 
