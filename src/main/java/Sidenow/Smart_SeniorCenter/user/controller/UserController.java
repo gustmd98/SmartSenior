@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.security.Principal;
@@ -95,13 +96,31 @@ public class UserController {
     }
 
 
-    @PutMapping("/profile")
-    public ResponseEntity<String> updateProfile (
-            @RequestBody UpdateProfileRequestDto updateProfileRequestDto,
-            Principal principal){
-        userService.updateProfile(principal, updateProfileRequestDto);  // 인증된 사용자 정보와 DTO 전달
-        return ResponseEntity.ok("Profile updated successfully");
-    }
+//    @PutMapping("/profile")
+//    public ResponseEntity<String> updateProfile (
+//            @RequestBody UpdateProfileRequestDto updateProfileRequestDto,
+//            Principal principal){
+//        String response=userService.updateProfile(principal, updateProfileRequestDto);  // 인증된 사용자 정보와 DTO 전달
+//        return ResponseEntity.ok(response);
+//    }
+@PutMapping("/profile")
+public ResponseEntity<UpdateProfileResponseDto> updateProfile(
+        @RequestParam(value = "password", required = false) String password,
+        @RequestParam(value = "phonenum", required = false) String phonenum,
+        @RequestParam(value = "favoriteplace", required = false) String favoriteplace,
+        @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+        Principal principal) {
 
+    UpdateProfileRequestDto updateProfileRequestDto = UpdateProfileRequestDto.builder()
+            .password(password)
+            .phonenum(phonenum)
+            .favoriteplace(favoriteplace)
+            .profileImage(profileImage)
+            .build();
+
+    UpdateProfileResponseDto response = userService.updateProfile(principal, updateProfileRequestDto);
+
+    return ResponseEntity.ok(response);
+}
 
 }

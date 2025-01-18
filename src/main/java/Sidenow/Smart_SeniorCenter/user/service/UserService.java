@@ -15,7 +15,7 @@ public interface UserService {
    // 중복 아이디 확인 메서드 추가
    boolean isUsernameAvailable(String username);
 
-   String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto);
+   UpdateProfileResponseDto updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto);
 
    UserProfileDto getUserProfile(String userid);//프로필정보 보기
 

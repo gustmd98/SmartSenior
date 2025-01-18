@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Service
@@ -120,11 +119,11 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public String updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto) {
+    public UpdateProfileResponseDto updateProfile(Principal principal, UpdateProfileRequestDto updateProfileRequestDto) {
 
-        String username = principal.getName();
+        String userId = principal.getName();
 
-        User user = userRepository.findByUsernameIgnoreCase(username)
+        User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // updateProfileRequestDto를 통해 받은 데이터로 사용자 정보 수정
@@ -150,7 +149,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             try {
-                String profileImagePath = saveProfileImage(username, updateProfileRequestDto.getProfileImage());
+                String profileImagePath = saveProfileImage(userId, updateProfileRequestDto.getProfileImage());
                 user.setProfileImagePath(profileImagePath);  // 저장된 이미지 경로 설정
             } catch (IOException e) {
                 throw new RuntimeException("Profile image upload failed", e);
@@ -158,7 +157,14 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.save(user);
 
-        return "Updated successfully";
+        return UpdateProfileResponseDto.builder()
+                .username(user.getUsername())
+                .birth(user.getBirth())
+                .name(user.getName())
+                .phonenum(user.getPhonenum())
+                .favoriteplace(user.getFavoriteplace())
+                .profileImagePath(user.getProfileImagePath())
+                .build();
     }
     @Override
     public String saveProfileImage(String username, MultipartFile file) throws IOException {

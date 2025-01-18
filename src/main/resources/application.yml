@@ -16,3 +16,8 @@ spring:
       open-in-view: false
   jwt:
     secret: "0SE/1s6T59aT75/Du/QMFTSLUTy+iU1eSlf7Sv3G+ZI="
+  servlet:
+      multipart:
+        enabled: true
+        max-file-size: 10MB
+        max-request-size: 10MB
